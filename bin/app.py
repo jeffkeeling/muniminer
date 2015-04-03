@@ -94,10 +94,10 @@ class Upload:
             fout.write(x.myfile.file.read())
             fout.close()
             subprocess.call([
-                'pdftotext', '-table', '/Users/jeff/pdfParse/static/temp.pdf', '/Users/jeff/pdfParse/static/output.txt'
+                'pdftotext', '-table', 'static/temp.pdf', 'static/output.txt'
             ])
 
-            with open('/Users/jeff/pdfParse/static/output.txt') as fi: txt=fi.read()
+            with open('../static/output.txt') as fi: txt=fi.read()
  
             returnval = processRegex(txt)
             return returnval
