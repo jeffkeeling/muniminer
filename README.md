@@ -5,7 +5,7 @@ Muniminer is a tool that will allow users to upload PDFs to a server and receive
 
 ###Requirements
 
-1. XPDF command line tool which uses pdftotext
+1. XPDF command line tool which uses pdftotext (linux binary, tested on OSX 10.9.5)
 2. python2.7
 3. pip
 4. web.py `pip install web.py` (using sudo if needed)
