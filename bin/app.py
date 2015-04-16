@@ -71,13 +71,43 @@ application = app.wsgifunc()
 def processRegex(txt):
     regs = [ 
         r"^\s*(Table IV-1\s*$([^\$]*?\n)+(.*?\$[0-9,]+\.?[0-9]?[0-9]?\n\s*\n)+)",
-        r"(as of (\w+ \d\d?, \d\d\d\d), the total.*?bonds outstanding was \$[0-9,]+\.?[0-9]?[0-9]?)"
+        r"(as of (\w+ \d\d?, \d\d\d\d),? the total.*?bonds outstanding was \$[0-9,]+\.?[0-9]?[0-9]?)"
     ]
     p = Parse(txt)
     out = [] 
     for r in regs:
-       out.append( p.getRegex(r) )
+       if r:
+           out.append( p.getRegex(r) )
+       else:
+           # todo: associate a name with each regex so it's clear what was/wasn't found
+           out.append("Text Pattern Not Found")
+    out.append('\n----------------------- CSV Format -----------------------n')
+    csv = ''
+    for s in out:
+        #print(s)
+        if s:
+            csv = csv + make_csv(s)
+    out.append(csv)
+    # TOOD? also append the full PDF text
     return '\n\n'.join(out)
+
+def make_csv(txt):
+    txt = txt.replace(',', '')
+    # Splits columns when there are 3 or more spaces. Not sure how robust this rule is.
+    column_break = r"[ ]{3}[ ]*"
+    # tried with /t instead of comma, but still didn't paste into Excel as columns
+    csv = re.sub(column_break, ",", txt)
+    #remove empty lines?
+    empty_row = r"\n{2}\n*"
+    csv = re.sub(empty_row, "\n", csv)
+    # This is not good enough because 1) many tables use indentation within a column (following cells get shifted right).
+    # and 2) empty cells are skipped (following cells get shifted left).
+    #   idea: split each comma-delimited row on commas to determine the number of columns in each row and compute the avg
+    #           Verify that split() counts a leading , (first string in output is empty)
+    #     For each row, 
+    #       if its col count > avg and original text of row starts with a space, then INDENTED - remove first comma
+    #       if its col count < avg, append an extra column with text "<---- Data misaligned - empty table cell(s) in this row?"
+    return csv
 
 class Upload:
     def GET(self):
