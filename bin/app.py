@@ -88,7 +88,8 @@ def processRegex(txt):
         if s:
             csv = csv + make_csv(s)
     out.append(csv)
-    # TOOD? also append the full PDF text
+    out.append('\n----------------------- Full PDF Text -----------------------n')
+    out.append(txt)
     return '\n\n'.join(out)
 
 def make_csv(txt):
