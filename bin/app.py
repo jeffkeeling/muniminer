@@ -4,6 +4,8 @@ import web
 from web import form
 import subprocess
 import re
+import json
+from pprint import pprint
 
 class Parse:
 
@@ -49,6 +51,8 @@ class Parse:
       match_obj = p.search(me.txt[me.i:])
       if match_obj:
          me.i = match_obj.end()
+         #TODO: label each match with the regex's name
+         #TODO: concatenate all match groups rather than assuming just one instance is desired
          return match_obj.group(1)
       else:
          return None 
@@ -69,26 +73,30 @@ app = web.application(urls, globals(), autoreload=False)
 application = app.wsgifunc()
 
 def processRegex(txt):
-    regs = [ 
-        r"^\s*(Table IV-1\s*$([^\$]*?\n)+(.*?\$[0-9,]+\.?[0-9]?[0-9]?\n\s*\n)+)",
-        r"(as of (\w+ \d\d?, \d\d\d\d),? the total.*?bonds outstanding was \$[0-9,]+\.?[0-9]?[0-9]?)"
-    ]
+    with open('../static/config.json') as data_file:    
+        json_data = json.load(data_file)
+    pprint(json_data)
+
     p = Parse(txt)
     out = [] 
-    for r in regs:
-       if r:
-           out.append( p.getRegex(r) )
-       else:
-           # todo: associate a name with each regex so it's clear what was/wasn't found
-           out.append("Text Pattern Not Found")
-    out.append('\n----------------------- CSV Format -----------------------n')
+    for name in json_data:
+       if name != 'comments':
+         out.append('\nResults for ' + name + ':\n')
+         match = p.getRegex(json_data[name])
+         if match:
+             out.append( match )
+         else:
+             out.append("Not Found")
+
+    out.append('\n----------------------- CSV Format -----------------------')
     csv = ''
     for s in out:
         #print(s)
         if s:
             csv = csv + make_csv(s)
     out.append(csv)
-    out.append('\n----------------------- Full PDF Text -----------------------n')
+
+    out.append('\n\n----------------------- Full PDF Text -----------------------\n')
     out.append(txt)
     return '\n\n'.join(out)
 
@@ -129,6 +137,8 @@ class Upload:
             ])
 
             with open('../static/output.txt') as fi: txt=fi.read()
+
+            #TODO? replace any 0xad (soft hyphen) with '-' ? 
  
             returnval = processRegex(txt)
             return returnval

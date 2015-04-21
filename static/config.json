@@ -1,0 +1,8 @@
+{
+
+	"comments" : "This is a list (UTF-8 encoding) of Python regular expression patterns to be applied to PDF document text. Note that a double backslash sequence \\ is interpreted as a single backslash. Pattern for a dollar ammount:  \\$[0-9,]+\\.?[0-9]?[0-9]?",
+	
+	"Table IV-1" : "^\\s*(Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
+
+    "Bonds Outstanding" : "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
+}
