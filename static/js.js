@@ -1,8 +1,8 @@
 $(document).ready(function(){
-    console.log('ready');
-    $('.submit-button').on('click', function(e){
+    $("form").submit(function(e){
         e.preventDefault();
-        var file = $('.pdf-container').val();
+        var file = $('input[name="pdfFile"]').val();
+        console.log(file);
         //method="POST"  enctype="multipart/form-data" action="
 
         console.log(file);

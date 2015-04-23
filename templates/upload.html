@@ -6,12 +6,30 @@
     </head>
 	<body>
 		<div id="container">
-	        <p>MuniMiner</p>
-			<form method="POST"  enctype="multipart/form-data" action="">
-				<input type="file" name="myfile" />
-				<br />
-				<input type="submit" />
-			</form>
+	        <h1>MuniMiner</h1>
+            <form class="pdf-form" method="POST"  enctype="multipart/form-data" action="">
+            	<div id="form-sections-container">
+                    <div id="pdf-container">
+                        <p>Select a PDF to process</p>
+                        <input type="file" name="pdfFile" />
+                    </div>
+                    <div id="profile-container">
+                        <p>Select a profile to parse your PDF</p>
+                        <select>
+                        	<option>Select a Profile</option>
+                            <option>Profile 1</option>
+                            <option>Profile 2</option>
+                            <option>Profile 3</option>
+                            <option>Profile 4</option>
+                        </select>
+                        <p>Or provide your own</p>
+                        <input type="text" name="profileName" />
+                        <textarea></textarea>
+                    </div>
+				</div>
+                
+                <input type="submit" value="upload" />
+            </form>
 		</div>
 	</body>
 </html>

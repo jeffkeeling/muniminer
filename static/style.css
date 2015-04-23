@@ -1,9 +1,34 @@
 #container {
-	width: 900px;
-	margin:  0 auto;
-	color:  red;
+	max-width: 800px;
+	margin: 0 auto;
+}
+#container h1 {
+    text-align: center;
 }
 #container p {
-	font-size:  30px;
-	color: blue;
+
+}
+#form-sections-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: no-wrap;
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    justify-content: center;
+    -webkit-justify-content: center; 
+}
+#form-sections-container > div {
+	width: 250px;
+	text-align: center;
+}
+#form-sections-container > div > input,
+#form-sections-container > div > p,
+#form-sections-container > div > select {
+	margin: 10px auto;
+	
+}
+form > input {
+    display: block;
+    margin: 0 auto;
 }
