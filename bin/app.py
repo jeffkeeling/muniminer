@@ -118,11 +118,12 @@ def make_csv(txt):
 
 class Upload:
     def GET(self):
-        if web.ctx.env.get('HTTP_AUTHORIZATION') is not None:
+        # authentication check
+        # if web.ctx.env.get('HTTP_AUTHORIZATION') is not None:
           web.header('Content-Type', 'text/html; charset=usf-8')
           return render.upload()
-        else:
-            raise web.seeother('/login')
+        # else:
+        #     raise web.seeother('/login')
 
     def POST(self):
         x = web.input(myfile={})

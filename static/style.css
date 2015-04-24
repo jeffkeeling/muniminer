@@ -1,9 +1,16 @@
 #container {
 	max-width: 800px;
 	margin: 0 auto;
+	font-family: sans-serif;
 }
 #container h1 {
-    text-align: center;
+    margin: 0 auto;
+    width: 208px;
+    height: 165px;
+    background: url(/static/logo.png);
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
 }
 #container p {
 
@@ -21,6 +28,11 @@
 #form-sections-container > div {
 	width: 250px;
 	text-align: center;
+	
+}
+#form-sections-container > div:first-child {
+	margin-right: 17px;
+	border: 4px dashed #000000;
 }
 #form-sections-container > div > input,
 #form-sections-container > div > p,
@@ -30,5 +42,5 @@
 }
 form > input {
     display: block;
-    margin: 0 auto;
+    margin: 10px auto;
 }
