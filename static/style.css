@@ -21,6 +21,51 @@ html {
     overflow: hidden;
     margin-bottom: 30px;
 }
+h2 {
+    text-align: center;
+}
+.page-container{
+    max-width: 600px;
+    margin: 0 auto;
+}
+nav {
+    width: 100%;
+    background-color: rgb(173, 173, 173);
+    color: white;
+    padding: 3px;
+    margin-bottom: 30px;
+    border-radius: 5px;
+}
+nav ul {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: no-wrap;
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+    -webkit-flex-wrap: no-wrap;
+    justify-content: center;
+    -webkit-justify-content: center; 
+    padding: 0 20px;
+    margin: 5px 0;
+}
+nav ul li {
+    margin: 0 20px;
+}
+nav a{
+    color: white;
+    text-decoration: none;
+    padding: 3px;
+}
+nav a:visited {
+    color: white;
+}
+nav a:hover {
+    color: white;
+    border: solid 1px white;
+    border-radius: 5px;
+    margin:-1px; 
+}
 #container p {
 
 }
@@ -33,7 +78,7 @@ html {
 #form-sections-container {
     display: flex;
     flex-direction: row;
-    flex-wrap: no-wrap;
+    flex-wrap: wrap;
     display: -webkit-flex;
     -webkit-flex-direction: row;
     -webkit-flex-wrap: wrap;
@@ -91,9 +136,10 @@ form input[type="text"] {
     padding: 5px;
     border-radius: 5px;
 }
-.valid:after {
+.valid:before {
     content: url('/static/check.png');
-    padding-left: 10px;
+    margin-left: -25px;
+    position: absolute;
 }
 .profile-name-container {
     margin: 20px 0;
@@ -110,4 +156,58 @@ p.example{
     color: rgb(119, 119, 119);
     font-size: 10;
     text-align: left;
+}
+.profile-list {
+    list-style: none;
+    padding: 0;
+    width: 313px;
+    margin: 0 auto;
+}
+.profile-list li {
+    margin-bottom: 20px;
+}
+.profile-list div {
+    width: 145px;
+    display: inline-block;
+    vertical-align: top;
+}
+.profile-labels {
+    width: 313px;
+    margin: 0 auto;
+    border-bottom: solid 2px rgb(228, 228, 228);
+    margin-bottom: 20px;
+    padding-bottom: 6px;
+}
+.profile-labels div{
+    width: 145px;
+    display: inline-block;
+}
+.delete-profile {
+    cursor: pointer;
+    padding: 0px 6px 1px;
+    font-size: 18px;
+    vertical-align: top;
+    color: rgb(171, 29, 29);
+}
+.delete-profile:hover {
+    border: 1px solid rgb(171, 29, 29);
+    margin: -1px;
+      border-radius: 12px;
+  
+}
+.save-profiles {
+    padding: 13px;
+    font-size: 18px;
+    background-color: rgb(248, 154, 31);
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 30px;
+    margin: 0 auto;
+    display: block;
+}
+.save-profiles.disabledButton {
+    opacity: 0.5;
+    cursor: no-drop;
 }

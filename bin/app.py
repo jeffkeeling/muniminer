@@ -55,7 +55,8 @@ class Parse:
          return None 
 
 
-render = web.template.render('../templates/')
+
+render = web.template.render('../templates/', base='layout')
 abspath = os.path.dirname(__file__)
 sys.path.append(abspath)
 os.chdir(abspath)
@@ -64,7 +65,9 @@ urls = (
     '/', 'Upload',
     '/upload', 'Upload',
     '/display', "Display",
-    '/login', 'Login'
+    '/login', 'Login',
+    '/about', 'About',
+    '/edit-profiles', 'Edit_profiles'
 )
 
 app = web.application(urls, globals(), autoreload=False)
@@ -115,6 +118,15 @@ def make_csv(txt):
     #       if its col count > avg and original text of row starts with a space, then INDENTED - remove first comma
     #       if its col count < avg, append an extra column with text "<---- Data misaligned - empty table cell(s) in this row?"
     return csv
+
+class About:
+    def GET(self):
+        return render.about()
+
+class Edit_profiles:
+    def GET(self):
+        return render.editProfiles()
+
 
 class Upload:
     def GET(self):

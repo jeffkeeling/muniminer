@@ -1,47 +1,38 @@
-<html>
-	<head>
-        <link rel="stylesheet" type="text/css" href="/static/style.css">
-        <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-        <script src="/static/js.js"></script>
-        <link href='http://fonts.googleapis.com/css?family=Karla' rel='stylesheet' type='text/css'>
-    </head>
-	<body>
-		<div id="container">
-	        <h1>MuniMiner</h1>
-            <form class="pdf-form" method="POST"  enctype="multipart/form-data" action="">
-            	<div id="form-sections-container">
-                    <div id="pdf-container">
-                        <p class="instruction">1. Select a PDF to process</p>
-                        <input type="file" name="pdfFile" accept="application/pdf"  />
-                        <p class="or">Or</p>
-                        <p>Drag and Drop your PDF here</p>
-                    </div>
-                    <div id="profile-container">
-                        <p class="instruction">2. Select a profile <br /> to parse your PDF</p>
-                        <select class="profile-dropdown">
-                        	<option value="default">Select a Profile</option>
-                            <option value="profile1">Profile 1</option>
-                            <option value="profile2">Profile 2</option>
-                            <option value="profile3">Profile 3</option>
-                            <option value="profile4">Profile 4</option>
-                        </select>
-                        <p class="or">Or</p>
-                        <p>Make your own</p>
-                        <div class="profile-name-container">
-                            <label for="customProfileName">New Profile Name</label>
-                            <input type="text" name="customProfile" id="customProfileName"/>
-                            
-                        </div>
-                        <div class="regex-container">
-                            <label for="customProfileRegex">New Regular Expression</label>
-                            <p class="example">example: /Title\s[a-zA-Z]+{0,9}/</p> 
-                            <textarea id="customProfileRegex" class="customProfileRegex" rows="5" cols="10"></textarea>
-                        </div>
-                    </div>
-				</div>
+$var showPDFLink: False
+
+<form class="pdf-form" method="POST"  enctype="multipart/form-data" action="">
+	<div id="form-sections-container">
+        <div id="pdf-container">
+            <p class="instruction">1. Select a PDF to process</p>
+            <input type="file" name="pdfFile" accept="application/pdf"  />
+            <p class="or">Or</p>
+            <p>Drag and Drop your PDF here</p>
+            <!-- <p class="or">Or</p>
+            <div class="dropbox-container"></div> -->
+        </div>
+        <div id="profile-container">
+            <p class="instruction">2. Select a profile <br /> to parse your PDF</p>
+            <select class="profile-dropdown">
+            	<option value="default">Select a Profile</option>
+                <option data-custom="false" value="profile1">Profile 1</option>
+                <option data-custom="false" value="profile2">Profile 2</option>
+                <option data-custom="false" value="profile3">Profile 3</option>
+                <option data-custom="false" value="profile4">Profile 4</option>
+            </select>
+            <p class="or">Or</p>
+            <p>Make your own</p>
+            <div class="profile-name-container">
+                <label for="customProfileName">New Profile Name</label>
+                <input type="text" name="customProfile" id="customProfileName"/>
                 
-                <input type="submit" value="upload"  disabled class="disabledButton" />
-            </form>
-		</div>
-	</body>
-</html>
+            </div>
+            <div class="regex-container">
+                <label for="customProfileRegex">New Regular Expression</label>
+                <p class="example">example: /Title\s[a-zA-Z]+{0,9}/</p> 
+                <textarea id="customProfileRegex" class="customProfileRegex" rows="5" cols="10"></textarea>
+            </div>
+        </div>
+	</div>
+    
+    <input type="submit" value="upload"  disabled class="disabledButton" />
+</form>
