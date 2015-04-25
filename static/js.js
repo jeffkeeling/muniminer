@@ -3,25 +3,42 @@ $(document).ready(function(){
         //$(this.ui.dragable_area).addClass('dropzone-hovered');
         e.preventDefault();
         e.stopPropagation();
-        $('#pdf-container').css('background-color', 'green');
+        $('#pdf-container').addClass('hovered');
     };
     var dragLeave = function(e) {
         e.preventDefault();
         e.stopPropagation();
-        $('#pdf-container').css('background-color', 'white');
+        $('#pdf-container').removeClass('hovered');
     };
     var dropFile = function(e) {
         e.preventDefault();
         e.stopPropagation();
+        var mimeType= e.originalEvent.dataTransfer.files[0].type; 
+        $('#pdf-container').removeClass('hovered');
+        if (mimeType !== 'application/pdf') {
+            return;
+        }
         $('input[name="pdfFile"]').prop('files', e.originalEvent.dataTransfer.files);
+        
     };
     var checkForm = function(e) {
-        if ( $('input[name="pdfFile"]') && 
+        //to do: combine checks into one
+        //to do: remove check if invalid
+        if ( $('input[name="pdfFile"]').val() ){
+            $('#pdf-container > p:first-child').addClass('valid');
+        }
+
+        if($('.profile-dropdown').val() !== 'default' || 
+                ($('.customProfileRegex').val() && $('input[name="customProfile"]').val()) ){
+            $('#profile-container > p:first-child').addClass('valid');
+        }
+
+        if ( $('input[name="pdfFile"]').val() && 
             ( $('.profile-dropdown').val() !== 'default' || 
                 ($('.customProfileRegex').val() && $('input[name="customProfile"]').val()) ) ){
-            $('input[type="submit"]').attr("disabled", false);
+            $('input[type="submit"]').attr("disabled", false).removeClass('disabledButton');
         } else {
-            $('input[type="submit"]').attr("disabled", true);
+            $('input[type="submit"]').attr("disabled", true).addClass('disabledButton');
         }
     }
 
