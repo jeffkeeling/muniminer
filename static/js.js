@@ -175,8 +175,8 @@ $(document).ready(function(){
             // see File types below. By default, all extensions are allowed.
             extensions: ['.pdf'],
         };
-        var button = Dropbox.createChooseButton(options);
-        $('.dropbox-container').html(button);
+        // var button = Dropbox.createChooseButton(options);
+        // $('.dropbox-container').html(button);
     }
 
     if(window.location.pathname === '/edit-profiles') {
