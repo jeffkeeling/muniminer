@@ -4,6 +4,7 @@ import web
 from web import form
 import subprocess
 import re
+import base64
 import json
 from pprint import pprint
 
@@ -59,7 +60,8 @@ class Parse:
          return None 
 
 
-render = web.template.render('../templates/')
+
+render = web.template.render('../templates/', base='layout')
 abspath = os.path.dirname(__file__)
 sys.path.append(abspath)
 os.chdir(abspath)
@@ -67,11 +69,18 @@ os.chdir(abspath)
 urls = (
     '/', 'Upload',
     '/upload', 'Upload',
-    '/display', "Display"
+    '/display', "Display",
+    '/login', 'Login',
+    '/about', 'About',
+    '/edit-profiles', 'Edit_profiles'
 )
 
 app = web.application(urls, globals(), autoreload=False)
 application = app.wsgifunc()
+
+allowed = {
+    'user':'pass'
+}
 
 def processRegex(txt):
     with open('../static/config.json') as data_file:    
@@ -123,10 +132,23 @@ def make_csv(txt):
     #       if its col count < avg, append an extra column with text "<---- Data misaligned - empty table cell(s) in this row?"
     return csv
 
+class About:
+    def GET(self):
+        return render.about()
+
+class Edit_profiles:
+    def GET(self):
+        return render.editProfiles()
+
+
 class Upload:
     def GET(self):
-        web.header('Content-Type', 'text/html; charset=usf-8')
-        return render.upload()
+        # authentication check
+        # if web.ctx.env.get('HTTP_AUTHORIZATION') is not None:
+          web.header('Content-Type', 'text/html; charset=usf-8')
+          return render.upload()
+        # else:
+        #     raise web.seeother('/login')
 
     def POST(self):
         x = web.input(myfile={})
@@ -145,6 +167,26 @@ class Upload:
 
             returnval = processRegex(txt)
             return returnval
+
+class Login:
+    def GET(self):
+        auth = web.ctx.env.get('HTTP_AUTHORIZATION')
+        authreq = False
+        if auth is None:
+            authreq = True
+        else:
+            auth = re.sub('^Basic ','',auth)
+            username,password = base64.decodestring(auth).split(':')
+            for key in allowed:
+                if allowed[key] == password and key == username: 
+                    raise web.seeother('/')
+                else:
+                    authreq = True
+        if authreq:
+            web.header('WWW-Authenticate','Basic realm="Auth example"')
+            web.ctx.status = '401 Unauthorized'
+            return
+
 
 class Display: 
      def GET(self):
