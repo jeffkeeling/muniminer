@@ -16,16 +16,16 @@ class Parse:
        me.i = 0
        me.txt = txt
    
-   def getDollars(me):
+   #def getDollars(me):
       ## looks for dollar amount after possible
       ## white space, returns it
-      me._skip()
-      p = me._compile( r"(\$[\d\,]+)" )           
-      return me.get_return(p)
+      #me._skip()
+      #p = me._compile( r"(\$[\d\,]+)" )           
+      #return me.get_return(p)
 
    def getRegex(me,regex):
+     #me._skip()
      ## looks for regex 
-     me._skip()
      p = me._compile(regex)
      return me.get_return(p)
 
@@ -48,13 +48,14 @@ class Parse:
               )
 
    def get_return(me,p):
+      #TODO: use findall instead of search to get multiple matches rather than assuming just 1st instance is desired
       match_obj = p.search(me.txt[me.i:])
       if match_obj:
+         print("\tfound at " + str(match_obj.start()))
          me.i = match_obj.end()
-         #TODO: label each match with the regex's name
-         #TODO: concatenate all match groups rather than assuming just one instance is desired
          return match_obj.group(1)
       else:
+         print("\tdidn't find")
          return None 
 
 
@@ -75,19 +76,21 @@ application = app.wsgifunc()
 def processRegex(txt):
     with open('../static/config.json') as data_file:    
         json_data = json.load(data_file)
-    pprint(json_data)
+    #pprint(json_data)
 
     p = Parse(txt)
     out = [] 
     for name in json_data:
        if name != 'comments':
          out.append('\nResults for ' + name + ':\n')
+         print("searching for " + name)
          match = p.getRegex(json_data[name])
          if match:
              out.append( match )
          else:
              out.append("Not Found")
 
+    print('Creating CSV version of output...')
     out.append('\n----------------------- CSV Format -----------------------')
     csv = ''
     for s in out:
@@ -96,8 +99,10 @@ def processRegex(txt):
             csv = csv + make_csv(s)
     out.append(csv)
 
+    print('Appending full PDF text...')
     out.append('\n\n----------------------- Full PDF Text -----------------------\n')
-    out.append(txt)
+    # Strangely, append() can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
+    out.append(txt.replace('\xad', '-'))
     return '\n\n'.join(out)
 
 def make_csv(txt):
@@ -138,8 +143,6 @@ class Upload:
 
             with open('../static/output.txt') as fi: txt=fi.read()
 
-            #TODO? replace any 0xad (soft hyphen) with '-' ? 
- 
             returnval = processRegex(txt)
             return returnval
 
