@@ -153,11 +153,11 @@ class Upload:
     def POST(self):
         x = web.input(myfile={})
         filedir = '../static'
-        if 'myfile' in x:  # chck file obj created
-            filepath = x.myfile.filename.replace('\\', '/')
-            filename = filepath.split('/')[-1]
+        if 'pdfFile' in x:  # chck file obj created
+            #filepath = x.myfile.filename.replace('\\', '/')
+            #filename = filepath.split('/')[-1]
             fout = open(filedir + '/temp.pdf', 'w')
-            fout.write(x.myfile.file.read())
+            fout.write(x.pdfFile)    #.file.read())
             fout.close()
             subprocess.call([
                 'pdftotext', '-table', 'static/temp.pdf', 'static/output.txt'
