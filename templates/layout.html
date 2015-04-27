@@ -6,7 +6,7 @@ $def with (content)
         <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
         <script src="/static/js.js"></script>
         <link href='http://fonts.googleapis.com/css?family=Karla' rel='stylesheet' type='text/css'>
-        
+
     </head>
     <body>
         <div id="container">
@@ -15,8 +15,8 @@ $def with (content)
                 <a href="/"><h1>MuniMiner</h1></a>
                 <nav>
                     <ul>
-                        $if content.showPDFLink == 'True':
-                            <li><a class="" href="/">&#171; New PDF</a></li>
+                        <li><a href="/">Home</a></li>
+                        <li id="edit-profiles-link"><a href="/edit-profiles">Edit Custom Profiles</a></li>
                         <li><a href="/about">About</a></li>
                     </ul>
                 </nav>

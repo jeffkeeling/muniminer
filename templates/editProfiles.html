@@ -1,14 +1,20 @@
-$var showPDFLink: True
-
-<div class="page-container">
+<div id="edit-profiles-container">
     <h2>Edit Profiles</h2>
-    <div class="profile-labels">
+    <div id="edit-profiles-error" class='error'></div>
+    <div id="edit-profile-headers">
         <div>Profile Name</div> 
         <div>Regular Expression</div>
     </div>
-    <ul class="profile-list">
+
+    <ul id="edit-profile-list">
 
     </ul>
+    <div id="add-new-profile">Add More</div>
+    <div id="edit-profiles-success">Saved</div>
 
-     <input class="save-profiles disabledButton" type="submit" value="save"  disabled />
+    <input class="disabled-button submit-button" id="save-profiles" type="submit" value="save"  disabled />
+
+    <div id="base-container">
+        <li><div><input id='profile-name'></div><div><textarea></textarea></div><span class='delete-profile'>&times;</span></li>
+    </div>
 </div>
