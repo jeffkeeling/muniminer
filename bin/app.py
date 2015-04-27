@@ -12,13 +12,16 @@ class Parse:
    def __init__(me,txt):
        ## public methods obtain values
        ## and move the pointer
-       me.i = 0
+       #me.i = 0
+       ## This pointer idea presumed a single pass through the PDF. But, that's obsolete since
+       ##  we are making one pass per regular expression now.
+
        me.txt = txt
    
    def getDollars(me):
       ## looks for dollar amount after possible
       ## white space, returns it
-      me._skip()
+      #me._skip()
       p = me._compile( r"(\$[\d\,]+)" )           
       return me.get_return(p)
 
@@ -28,17 +31,11 @@ class Parse:
      p = me._compile(regex)
      return me.get_return(p)
 
-   def getTable(me):
-      ## looks for a table after possible
-      ## white space and returns it as an
-      ## array of arrays
-      pass
-
-   def _skip(me):
-      p = me._compile(
-           r"([ \t\n\f]*)"
-      )
-      return me.get_return(p)
+   #def _skip(me):
+      #p = me._compile(
+      #     r"([ \t\n\f]*)"
+      #)
+      #return me.get_return(p)
 
    def _compile(me,regex):
        return re.compile(
@@ -47,10 +44,10 @@ class Parse:
               )
 
    def get_return(me,p):
-      match_obj = p.search(me.txt[me.i:])
+      #TODO: use findall instead of search to get multiple matches rather than assuming just 1st instance is desired
+      match_obj = p.search(me.txt)
       if match_obj:
          print("\tfound at " + str(match_obj.start()))
-         me.i = match_obj.end()
          return match_obj.group(1)
       else:
          print("\tdidn't find")
@@ -112,7 +109,7 @@ def make_csv(txt):
     column_break = r"[ ]{3}[ ]*"
     # tried with /t instead of comma, but still didn't paste into Excel as columns
     csv = re.sub(column_break, ",", txt)
-    #remove empty lines?
+    # remove empty lines
     empty_row = r"\n{2}\n*"
     csv = re.sub(empty_row, "\n", csv)
     # This is not good enough because 1) many tables use indentation within a column (following cells get shifted right).
