@@ -5,6 +5,7 @@ from web import form
 import subprocess
 import re
 import base64
+import json
 
 class Parse:
 
@@ -78,28 +79,35 @@ allowed = {
 }
 
 def processRegex(txt):
-    regs = [ 
-        r"^\s*(Table IV-1\s*$([^\$]*?\n)+(.*?\$[0-9,]+\.?[0-9]?[0-9]?\n\s*\n)+)",
-        r"(as of (\w+ \d\d?, \d\d\d\d),? the total.*?bonds outstanding was \$[0-9,]+\.?[0-9]?[0-9]?)"
-    ]
+    responseJson = {}
+    regs = {
+        'expression1': r"^\s*(Table IV-1\s*$([^\$]*?\n)+(.*?\$[0-9,]+\.?[0-9]?[0-9]?\n\s*\n)+)",
+        'expression2': r"(as of (\w+ \d\d?, \d\d\d\d),? the total.*?bonds outstanding was \$[0-9,]+\.?[0-9]?[0-9]?)"
+    }
     p = Parse(txt)
     out = [] 
     for r in regs:
        if r:
-           out.append( p.getRegex(r) )
+            responseJson[r] = p.getRegex(regs[r])
+            # out.append( p.getRegex(r) )
        else:
            # todo: associate a name with each regex so it's clear what was/wasn't found
-           out.append("Text Pattern Not Found")
+           
+            responseJson[r] = "Text Pattern Not Found"
+           # out.append("Text Pattern Not Found")
     out.append('\n----------------------- CSV Format -----------------------n')
     csv = ''
     for s in out:
-        #print(s)
+        print(s)
         if s:
             csv = csv + make_csv(s)
-    out.append(csv)
-    out.append('\n----------------------- Full PDF Text -----------------------n')
-    out.append(txt)
-    return '\n\n'.join(out)
+    responseJson['csv'] = csv
+    
+    # To do: full text currently broken in json
+    #responseJson['full'] = txt
+   
+    web.header('Content-Type', 'application/json')
+    return json.dumps(responseJson)
 
 def make_csv(txt):
     txt = txt.replace(',', '')

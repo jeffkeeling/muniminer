@@ -198,11 +198,17 @@
             contentType: false, // Set content type to false as jQuery will tell the server its a query string request
             success: function(data, textStatus, jqXHR)
             {
-                $('#form-container').html(data);
+                var container = ''
+                for (var i in data) {
+                    container += '<p>' + i + '</p><div>' + data[i] + '</div>'
+                }
+                $('#form-container').html(container);
             },
             error: function(jqXHR, textStatus, errorThrown)
             {
-                 $('#pdf-error').html("There was an error: " + textStatus).show();
+                console.log(jqXHR)
+                console.log(errorThrown);
+                $('#pdf-error').html("There was an error: " + textStatus).show();
             }
         });
     };
