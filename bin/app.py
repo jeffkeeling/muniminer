@@ -43,12 +43,16 @@ class Parse:
                     re.IGNORECASE+re.MULTILINE
               )
 
+   # Returns a list of tuples, each representing a match. Each tuple has 1 string for each group in the regex.
    def get_return(me,p):
-      #TODO: use findall instead of search to get multiple matches rather than assuming just 1st instance is desired
-      match_obj = p.search(me.txt)
-      if match_obj:
-         print("\tfound at " + str(match_obj.start()))
-         return match_obj.group(1)
+      tupleList = p.findall(me.txt)
+      if tupleList and len(tupleList) > 0:
+         print("\tfound " + str(len(tupleList)) + " match(es)")
+         matches = []
+         # Return a list of strings made up of the 0th entry in each tuple (first group in regex)
+         for t in tupleList:
+            matches.append(t[0])
+         return matches
       else:
          print("\tdidn't find")
          return None 
@@ -84,12 +88,15 @@ def processRegex(txt):
     p = Parse(txt)
     out = [] 
     for r in regs:
-       if r:
-           print("searching for " + r)
-           out.append( p.getRegex(r) )
+       out.append('\nResults for ' + r + ':\n')
+       print("searching for " + r)
+       matches = p.getRegex(r)
+       if matches and len(matches) > 0:
+           for m in matches:
+              out.append( m  + "\n")
        else:
-           # todo: associate a name with each regex so it's clear what was/wasn't found
-           out.append("Text Pattern Not Found")
+           out.append("Not Found")
+
     print('Creating CSV version of output...')
     out.append('\n----------------------- CSV Format -----------------------')
     csv = ''
@@ -104,14 +111,13 @@ def processRegex(txt):
     return '\n\n'.join(out)
 
 def make_csv(txt):
+    # First, remove existing commas
     txt = txt.replace(',', '')
-    # Splits columns when there are 3 or more spaces. Not sure how robust this rule is.
+    # Split into columns when there are 3 or more spaces. Not sure how robust this rule is.
     column_break = r"[ ]{3}[ ]*"
-    # tried with /t instead of comma, but still didn't paste into Excel as columns
     csv = re.sub(column_break, ",", txt)
-    # remove empty lines
-    empty_row = r"\n{2}\n*"
-    csv = re.sub(empty_row, "\n", csv)
+    # remove empty lines that pdftotext seems to always insert
+    csv = re.sub(r"\n\n", "\n", csv)
     # This is not good enough because 1) many tables use indentation within a column (following cells get shifted right).
     # and 2) empty cells are skipped (following cells get shifted left).
     #   idea: split each comma-delimited row on commas to determine the number of columns in each row and compute the avg
