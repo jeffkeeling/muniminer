@@ -24,7 +24,7 @@ class Parse:
 
    def getRegex(me,regex):
      ## looks for regex 
-     me._skip()
+     #me._skip()
      p = me._compile(regex)
      return me.get_return(p)
 
@@ -49,9 +49,11 @@ class Parse:
    def get_return(me,p):
       match_obj = p.search(me.txt[me.i:])
       if match_obj:
+         print("\tfound at " + str(match_obj.start()))
          me.i = match_obj.end()
          return match_obj.group(1)
       else:
+         print("\tdidn't find")
          return None 
 
 
@@ -86,19 +88,22 @@ def processRegex(txt):
     out = [] 
     for r in regs:
        if r:
+           print("searching for " + r)
            out.append( p.getRegex(r) )
        else:
            # todo: associate a name with each regex so it's clear what was/wasn't found
            out.append("Text Pattern Not Found")
-    out.append('\n----------------------- CSV Format -----------------------n')
+    print('Creating CSV version of output...')
+    out.append('\n----------------------- CSV Format -----------------------')
     csv = ''
     for s in out:
         #print(s)
         if s:
             csv = csv + make_csv(s)
     out.append(csv)
-    out.append('\n----------------------- Full PDF Text -----------------------n')
-    out.append(txt)
+    out.append('\n----------------------- Full PDF Text -----------------------\n')
+    # Strangely, append() can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
+    out.append(txt.replace('\xad', '-'))
     return '\n\n'.join(out)
 
 def make_csv(txt):
