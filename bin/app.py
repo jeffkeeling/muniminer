@@ -13,33 +13,30 @@ class Parse:
    def __init__(me,txt):
        ## public methods obtain values
        ## and move the pointer
-       me.i = 0
+       #me.i = 0
+       ## This pointer idea presumed a single pass through the PDF. But, that's obsolete since
+       ##  we are making one pass per regular expression now.
+
        me.txt = txt
    
    def getDollars(me):
       ## looks for dollar amount after possible
       ## white space, returns it
-      me._skip()
+      #me._skip()
       p = me._compile( r"(\$[\d\,]+)" )           
       return me.get_return(p)
 
    def getRegex(me,regex):
      ## looks for regex 
-     me._skip()
+     #me._skip()
      p = me._compile(regex)
      return me.get_return(p)
 
-   def getTable(me):
-      ## looks for a table after possible
-      ## white space and returns it as an
-      ## array of arrays
-      pass
-
-   def _skip(me):
-      p = me._compile(
-           r"([ \t\n\f]*)"
-      )
-      return me.get_return(p)
+   #def _skip(me):
+      #p = me._compile(
+      #     r"([ \t\n\f]*)"
+      #)
+      #return me.get_return(p)
 
    def _compile(me,regex):
        return re.compile(
@@ -47,12 +44,18 @@ class Parse:
                     re.IGNORECASE+re.MULTILINE
               )
 
+   # Returns a list of tuples, each representing a match. Each tuple has 1 string for each group in the regex.
    def get_return(me,p):
-      match_obj = p.search(me.txt[me.i:])
-      if match_obj:
-         me.i = match_obj.end()
-         return match_obj.group(1)
+      tupleList = p.findall(me.txt)
+      if tupleList and len(tupleList) > 0:
+         print("\tfound " + str(len(tupleList)) + " match(es)")
+         matches = []
+         # Return a list of strings made up of the 0th entry in each tuple (first group in regex)
+         for t in tupleList:
+            matches.append(t[0])
+         return matches
       else:
+         print("\tdidn't find")
          return None 
 
 
@@ -87,20 +90,33 @@ def processRegex(txt):
     p = Parse(txt)
     out = [] 
     for r in regs:
-       if r:
-            responseJson[r] = p.getRegex(regs[r])
-            # out.append( p.getRegex(r) )
-       else:
-           # todo: associate a name with each regex so it's clear what was/wasn't found
-           
+        out.append('\nResults for ' + regs[r] + ':\n')
+        print("searching for " + regs[r])
+        matches = p.getRegex(regs[r])
+        if matches and len(matches) > 0:
+            allmatches = ''
+            for m in matches:
+                allmatches += m  + "\n"
+                out.append( m  + "\n")
+            
+            responseJson[r] = allmatches
+        else:
             responseJson[r] = "Text Pattern Not Found"
-           # out.append("Text Pattern Not Found")
-    out.append('\n----------------------- CSV Format -----------------------n')
+            out.append("Not Found")
+
+    print('Creating CSV version of output...')
+    out.append('\n----------------------- CSV Format -----------------------')
     csv = ''
     for s in out:
         print(s)
         if s:
             csv = csv + make_csv(s)
+
+    out.append(csv)
+    out.append('\n----------------------- Full PDF Text -----------------------\n')
+    # Strangely, append() can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
+    out.append(txt.replace('\xad', '-'))
+    
     responseJson['csv'] = csv
     
     # To do: full text currently broken in json
@@ -109,15 +125,17 @@ def processRegex(txt):
     web.header('Content-Type', 'application/json')
     return json.dumps(responseJson)
 
+    #return '\n\n'.join(out)
+
+
 def make_csv(txt):
+    # First, remove existing commas
     txt = txt.replace(',', '')
-    # Splits columns when there are 3 or more spaces. Not sure how robust this rule is.
+    # Split into columns when there are 3 or more spaces. Not sure how robust this rule is.
     column_break = r"[ ]{3}[ ]*"
-    # tried with /t instead of comma, but still didn't paste into Excel as columns
     csv = re.sub(column_break, ",", txt)
-    #remove empty lines?
-    empty_row = r"\n{2}\n*"
-    csv = re.sub(empty_row, "\n", csv)
+    # remove empty lines that pdftotext seems to always insert
+    csv = re.sub(r"\n\n", "\n", csv)
     # This is not good enough because 1) many tables use indentation within a column (following cells get shifted right).
     # and 2) empty cells are skipped (following cells get shifted left).
     #   idea: split each comma-delimited row on commas to determine the number of columns in each row and compute the avg
