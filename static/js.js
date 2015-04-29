@@ -200,9 +200,10 @@
             {
                 var container = ''
                 for (var i in data) {
-                    container += '<p>' + i + '</p><div>' + data[i] + '</div>'
+                    container += '<p>' + i + '</p><pre>' + data[i] + '</pre>'
                 }
                 $('#form-container').html(container);
+
             },
             error: function(jqXHR, textStatus, errorThrown)
             {

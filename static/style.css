@@ -197,6 +197,10 @@ input[type="text"], textarea, #profile-name {
 	margin-top: 30px;
 }
 
+#form-container pre{
+    overflow: scroll;
+}
+
 #edit-profile-list {
     list-style: none;
     padding: 0;
