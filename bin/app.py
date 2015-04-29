@@ -83,9 +83,12 @@ allowed = {
 
 def processRegex(txt):
     responseJson = {}
+    # This is a list of Python regular expression patterns to be applied to document text. 
+    # Note that a double backslash sequence \\ is interpreted as a single backslash. 
+    #    Pattern for a dollar ammount:  \\$[0-9,]+\\.?[0-9]?[0-9]?"
     regs = {
-        'expression1': r"^\s*(Table IV-1\s*$([^\$]*?\n)+(.*?\$[0-9,]+\.?[0-9]?[0-9]?\n\s*\n)+)",
-        'expression2': r"(as of (\w+ \d\d?, \d\d\d\d),? the total.*?bonds outstanding was \$[0-9,]+\.?[0-9]?[0-9]?)"
+        'Table IV-1': "^\\s*(Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
+        'Bonds Outstanding': "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
     }
     p = Parse(txt)
     out = [] 
