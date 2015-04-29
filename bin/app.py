@@ -91,39 +91,33 @@ def processRegex(txt):
         'Bonds Outstanding': "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
     }
     p = Parse(txt)
-    out = [] 
+    listForCsv = [] 
     for r in regs:
-        out.append('\nResults for ' + regs[r] + ':\n')
-        print("searching for " + regs[r])
+        listForCsv.append('\nResults for ' + r + ':\n')
+        print("searching for " + r + ":  " + regs[r])
         matches = p.getRegex(regs[r])
         if matches and len(matches) > 0:
             allmatches = ''
             for m in matches:
                 allmatches += m  + "\n"
-                out.append( m  + "\n")
+                listForCsv.append( m  + "\n")
             
             responseJson[r] = allmatches
         else:
             responseJson[r] = "Text Pattern Not Found"
-            out.append("Not Found")
+            listForCsv.append("Not Found")
 
     print('Creating CSV version of output...')
-    out.append('\n----------------------- CSV Format -----------------------')
     csv = ''
-    for s in out:
+    for s in listForCsv:
         print(s)
         if s:
             csv = csv + make_csv(s)
-
-    out.append(csv)
-    out.append('\n----------------------- Full PDF Text -----------------------\n')
-    # Strangely, append() can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
-    out.append(txt.replace('\xad', '-'))
     
     responseJson['csv'] = csv
     
-    # To do: full text currently broken in json
-    #responseJson['full'] = txt
+    # Strangely, append() can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
+    responseJson['full'] = txt.replace('\xad', '-')
    
     web.header('Content-Type', 'application/json')
     return json.dumps(responseJson)
