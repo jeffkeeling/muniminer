@@ -131,7 +131,6 @@ def processRegex(txt, profileName, profileRegex):
     responseJson['CSV Format'] = csv
     
     # Strangely, JSON conversion can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
-    responseJson['Full Text From PDF'] = txt.replace('\xad', '-')
    
     web.header('Content-Type', 'application/json')
     return json.dumps(responseJson)
