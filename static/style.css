@@ -11,7 +11,7 @@ html {
 	max-width: 800px;
 	margin: 0 auto;
 }
-#container h1 {
+h1 {
     margin: 0 auto;
     width: 330px;
     height: 129px;
@@ -21,21 +21,15 @@ html {
     overflow: hidden;
     margin-bottom: 30px;
 }
-h2 {
-    text-align: center;
-}
-.page-container{
-    max-width: 600px;
-    margin: 0 auto;
-}
+
 nav {
     width: 100%;
     background-color: rgb(173, 173, 173);
-    color: white;
     padding: 3px;
     margin-bottom: 30px;
     border-radius: 5px;
 }
+
 nav ul {
     list-style: none;
     display: flex;
@@ -49,32 +43,51 @@ nav ul {
     padding: 0 20px;
     margin: 5px 0;
 }
+
 nav ul li {
     margin: 0 20px;
 }
+
 nav a{
     color: white;
     text-decoration: none;
     padding: 3px;
 }
+
 nav a:visited {
     color: white;
 }
+
 nav a:hover {
     color: white;
     border: solid 1px white;
     border-radius: 5px;
     margin:-1px; 
 }
-#container p {
 
+#edit-profiles-link {
+    min-width: 137px;
 }
-.instruction {
-    font-size: 16px;
+
+h2 {
+    text-align: center;
 }
-.or {
-    text-decoration: underline;
+
+#form-container{
+	max-width: 600px;
+	margin: 0 auto;	
 }
+
+#about-container{
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#edit-profiles-container {
+    width: 340px;
+    margin: 0 auto;
+}
+
 #form-sections-container {
     display: flex;
     flex-direction: row;
@@ -85,117 +98,86 @@ nav a:hover {
     justify-content: center;
     -webkit-justify-content: center; 
 }
-#form-sections-container > div {
+
+#pdf-container, #profile-container {
 	width: 250px;
-	text-align: center;
-	
+	text-align: center;	
 }
-#form-sections-container > div:first-child {
+
+#pdf-container {
 	margin-right: 17px;
 	border: 4px dashed #000000;
     border: 1px solid rgb(228, 228, 228);
     border-radius: 5px;
 }
-#form-sections-container > div:first-child.hovered {
+
+#pdf-container.hovered {
     box-shadow: 0 0 18px 6px #F7B533;
 }
-#form-sections-container > div > input,
-#form-sections-container > div > p,
-#form-sections-container > div > select {
+
+#form-sections-container input,
+#form-sections-container p,
+#form-sections-container select {
 	margin: 10px auto;
-	
 }
-form > input {
-    display: block;
-    margin: 10px auto;
+
+#pdf-instruction {
+    margin-bottom: 27px;
 }
-form textarea {
+
+.instruction {
+    font-size: 16px;
+}
+
+.or {
+    text-decoration: underline;
+}
+
+
+input[type="text"], textarea, #profile-name {
+	border: 1px solid rgb(228, 228, 228);
+	border-radius: 5px;
+	padding: 5px;
+}
+
+.error {
+    color: rgb(171, 29, 29);
+    display: none;
+}
+
+#custom-profile-regex {
     width: 100%;
-    border: 1px solid rgb(228, 228, 228);
-    border-radius: 5px;
 }
-form label {
+
+#profile-container label {
     font-size: 12px;
 }
-form input[type="submit"] {
-    padding: 13px;
-    font-size: 18px;
-    background-color: rgb(248, 154, 31);
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 30px;
-}
-form input[type="submit"].disabledButton {
-    opacity: 0.5;
-    cursor: no-drop;
-}
-form input[type="text"] {
-    border: 1px solid rgb(228, 228, 228);
-    padding: 5px;
-    border-radius: 5px;
-}
-.valid:before {
-    content: url('/static/check.png');
-    margin-left: -25px;
-    position: absolute;
-}
-.profile-name-container {
+
+#profile-name-container {
     margin: 20px 0;
 }
-.regex-container {
 
-}
-.regex-container label {
+#regex-container label {
     text-align: left;
     display: block;
 }
-p.example{
+
+#profile-container .example{
     margin: 0;
     color: rgb(119, 119, 119);
     font-size: 10;
     text-align: left;
 }
-.profile-list {
-    list-style: none;
-    padding: 0;
-    width: 313px;
-    margin: 0 auto;
+
+.valid:before {
+    content: url('/static/check.png');
+    margin-left: -25px;
+    position: absolute;
 }
-.profile-list li {
-    margin-bottom: 20px;
-}
-.profile-list div {
-    width: 145px;
-    display: inline-block;
-    vertical-align: top;
-}
-.profile-labels {
-    width: 313px;
-    margin: 0 auto;
-    border-bottom: solid 2px rgb(228, 228, 228);
-    margin-bottom: 20px;
-    padding-bottom: 6px;
-}
-.profile-labels div{
-    width: 145px;
-    display: inline-block;
-}
-.delete-profile {
-    cursor: pointer;
-    padding: 0px 6px 1px;
-    font-size: 18px;
-    vertical-align: top;
-    color: rgb(171, 29, 29);
-}
-.delete-profile:hover {
-    border: 1px solid rgb(171, 29, 29);
-    margin: -1px;
-      border-radius: 12px;
-  
-}
-.save-profiles {
+
+.submit-button{
+    display: block;
+    margin: 10px auto;
     padding: 13px;
     font-size: 18px;
     background-color: rgb(248, 154, 31);
@@ -204,10 +186,114 @@ p.example{
     border-radius: 4px;
     cursor: pointer;
     margin-top: 30px;
-    margin: 0 auto;
-    display: block;
 }
-.save-profiles.disabledButton {
+
+.submit-button.disabled-button {
     opacity: 0.5;
     cursor: no-drop;
+}
+
+
+#submit-form {
+	margin-top: 30px;
+}
+
+#form-container pre{
+    overflow: scroll;
+    border: 1px solid rgb(228, 228, 228);
+}
+.returned-profile-name {
+    font-weight: 800;
+    font-size: 16px;
+}
+
+#edit-profile-list {
+    list-style: none;
+    padding: 0;
+    width: 340px;
+    margin: 0 auto;
+}
+
+#edit-profile-list li {
+    margin-bottom: 20px;
+}
+
+#edit-profile-list div {
+    width: 145px;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 10px;
+}
+
+
+#edit-profile-headers {
+    width: 340;
+    margin: 0 auto;
+    border-bottom: solid 2px rgb(228, 228, 228);
+    margin-bottom: 20px;
+    padding-bottom: 6px;
+}
+
+#edit-profile-headers div{
+    width: 145px;
+    display: inline-block;
+    margin-right:  10px;
+}
+
+.delete-profile {
+    cursor: pointer;
+    padding: 0px 7px 1px;
+    font-size: 18px;
+    color: rgb(171, 29, 29);
+}
+
+.delete-profile:hover {
+    border: 1px solid rgb(171, 29, 29);
+    margin: -1px;
+    border-radius: 12px; 
+}
+
+#add-new-profile {
+    cursor: pointer;
+    display: inline-block;
+    margin-left: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 4px;
+}
+#submit-full-text-container{
+    text-align: center;
+}
+#submit-full-text {;
+    cursor: pointer;
+    margin: 0 auto;
+    display: inline-block;
+    font-size: 12px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 4px;
+}
+#submit-full-text.disabled-button {
+    opacity: 0.5;
+    cursor: no-drop;
+}
+
+#edit-profiles-error {
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+#edit-profiles-success {
+    display: none;
+    margin: 10px 0;
+    color: rgb(40, 176, 78);
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+}
+
+#base-container {
+    display: none;
 }

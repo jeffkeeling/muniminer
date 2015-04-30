@@ -6,7 +6,6 @@ import subprocess
 import re
 import base64
 import json
-from pprint import pprint
 
 class Parse:
 
@@ -14,33 +13,30 @@ class Parse:
    def __init__(me,txt):
        ## public methods obtain values
        ## and move the pointer
-       me.i = 0
+       #me.i = 0
+       ## This pointer idea presumed a single pass through the PDF. But, that's obsolete since
+       ##  we are making one pass per regular expression now.
+
        me.txt = txt
    
-   #def getDollars(me):
+   def getDollars(me):
       ## looks for dollar amount after possible
       ## white space, returns it
       #me._skip()
-      #p = me._compile( r"(\$[\d\,]+)" )           
-      #return me.get_return(p)
+      p = me._compile( r"(\$[\d\,]+)" )           
+      return me.get_return(p)
 
    def getRegex(me,regex):
-     #me._skip()
      ## looks for regex 
+     #me._skip()
      p = me._compile(regex)
      return me.get_return(p)
 
-   def getTable(me):
-      ## looks for a table after possible
-      ## white space and returns it as an
-      ## array of arrays
-      pass
-
-   def _skip(me):
-      p = me._compile(
-           r"([ \t\n\f]*)"
-      )
-      return me.get_return(p)
+   #def _skip(me):
+      #p = me._compile(
+      #     r"([ \t\n\f]*)"
+      #)
+      #return me.get_return(p)
 
    def _compile(me,regex):
        return re.compile(
@@ -48,13 +44,16 @@ class Parse:
                     re.IGNORECASE+re.MULTILINE
               )
 
+   # Returns a list of tuples, each representing a match. Each tuple has 1 string for each group in the regex.
    def get_return(me,p):
-      #TODO: use findall instead of search to get multiple matches rather than assuming just 1st instance is desired
-      match_obj = p.search(me.txt[me.i:])
-      if match_obj:
-         print("\tfound at " + str(match_obj.start()))
-         me.i = match_obj.end()
-         return match_obj.group(1)
+      tupleList = p.findall(me.txt)
+      if tupleList and len(tupleList) > 0:
+         print("\tfound " + str(len(tupleList)) + " match(es)")
+         matches = []
+         # Return a list of strings made up of the 0th entry in each tuple (first group in regex)
+         for t in tupleList:
+            matches.append(t[0])
+         return matches
       else:
          print("\tdidn't find")
          return None 
@@ -69,6 +68,7 @@ os.chdir(abspath)
 urls = (
     '/', 'Upload',
     '/upload', 'Upload',
+    '/full-text', 'FullText',
     '/display', "Display",
     '/login', 'Login',
     '/about', 'About',
@@ -82,55 +82,127 @@ allowed = {
     'user':'pass'
 }
 
-def processRegex(txt):
-    with open('../static/config.json') as data_file:    
-        json_data = json.load(data_file)
-    #pprint(json_data)
+# Notes for user if this data is exposed:
+# This is a list of Python regular expression patterns to be applied to document text. 
+# Each must have at least one pair of parentheses. Everything matching within the outermost pair will be returned as the match.
+# Note that a double backslash sequence \\ is interpreted as a single backslash. So a line break is \\n.
+#    Pattern for a dollar ammount:  \\$[0-9,]+\\.?[0-9]?[0-9]?"
+regs = {
+    'Table IV-1': "^(\\s*Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
+    'Bonds Outstanding': "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
+}
 
+def processRegex(txt, profileName, profileRegex):
+    responseJson = {}
     p = Parse(txt)
-    out = [] 
-    for name in json_data:
-       if name != 'comments':
-         out.append('\nResults for ' + name + ':\n')
-         print("searching for " + name)
-         match = p.getRegex(json_data[name])
-         if match:
-             out.append( match )
-         else:
-             out.append("Not Found")
+    listForCsv = []
+    regexName = ''
+    regexToUse = '' 
+    for r in regs:
+        if r == profileName:
+            regexName = r
+            regexToUse = regs[r]
+
+    if regexName == '':
+        regexName = profileName
+        regexToUse = r'%s' % profileRegex
+
+    listForCsv.append('\nResults for ' + regexName + ':\n')
+    print("searching for " + regexName + ":  " + regexToUse)
+    matches = p.getRegex(regexToUse)
+    if matches and len(matches) > 0:
+        allmatches = ''
+        for m in matches:
+            allmatches += m  + "\n"
+            listForCsv.append( m  + "\n")
+        
+        responseJson[regexName] = allmatches
+    else:
+        responseJson[regexName] = "Text Pattern Not Found"
+        listForCsv.append("Not Found")
 
     print('Creating CSV version of output...')
-    out.append('\n----------------------- CSV Format -----------------------')
     csv = ''
-    for s in out:
-        #print(s)
+    for s in listForCsv:
+        print(s)
         if s:
-            csv = csv + make_csv(s)
-    out.append(csv)
+            table_csv = make_csv(s)
+            if table_csv:
+                csv = csv + "\n" + table_csv
+    
+    if csv:
+        responseJson['CSV Format'] = csv
+       
+    web.header('Content-Type', 'application/json')
+    return json.dumps(responseJson)
 
-    print('Appending full PDF text...')
-    out.append('\n\n----------------------- Full PDF Text -----------------------\n')
-    # Strangely, append() can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
-    out.append(txt.replace('\xad', '-'))
-    return '\n\n'.join(out)
 
 def make_csv(txt):
-    txt = txt.replace(',', '')
-    # Splits columns when there are 3 or more spaces. Not sure how robust this rule is.
-    column_break = r"[ ]{3}[ ]*"
-    # tried with /t instead of comma, but still didn't paste into Excel as columns
-    csv = re.sub(column_break, ",", txt)
-    #remove empty lines?
-    empty_row = r"\n{2}\n*"
-    csv = re.sub(empty_row, "\n", csv)
-    # This is not good enough because 1) many tables use indentation within a column (following cells get shifted right).
-    # and 2) empty cells are skipped (following cells get shifted left).
-    #   idea: split each comma-delimited row on commas to determine the number of columns in each row and compute the avg
-    #           Verify that split() counts a leading , (first string in output is empty)
-    #     For each row, 
-    #       if its col count > avg and original text of row starts with a space, then INDENTED - remove first comma
-    #       if its col count < avg, append an extra column with text "<---- Data misaligned - empty table cell(s) in this row?"
+    # remove empty lines that pdftotext seems to always insert
+    singleSpaced = re.sub(r"\n\n", "\n", txt)
+    # remove existing commas
+    noCommas = singleSpaced.replace(',', '')
+    cleanLines = noCommas.splitlines()
+    foundTable = False
+    finishedLines = []
+    if len(cleanLines) > 1:
+        total = 0.0
+        numSkippedLines = 0
+        convertedLines = []
+        for line in cleanLines:
+            # if line stripped of whitespace is empty, skip csv conversion
+            if line.isspace():
+                convertedLines.append(line)
+                numSkippedLines += 1
+            else:
+                # Split into columns when there are 3 or more spaces. Not sure how robust this rule is.
+                column_break = r"[ ]{3}[ ]*"
+                convertedLine = re.sub(column_break, ",", line)
+                convertedLines.append(convertedLine)
+                # Count the number of columns in each row. This is used to detect rows with too many or too few columns
+                # which can indicate indentation in the first column (too many) or empty cells in this row (too few columns)
+                cols = len(convertedLine.split(','))
+                if is_in_table(convertedLine, cols):
+                    #print(str(cols) + " columns:     " + convertedLine)
+                    total += cols
+                else:
+                    # don't count this line in the table calculations
+                    numSkippedLines += 1
+
+        if numSkippedLines < len(convertedLines):
+            foundTable = True
+            avgCols = total / (len(convertedLines) - numSkippedLines)
+            avgColsRounded = int(round(avgCols))
+            print("Table columns = " + str(avgCols) + ", rounded to " + str(avgColsRounded))
+            for line in convertedLines:
+                cols = len(line.split(','))
+                if is_in_table(line, cols):
+                    # if its col count > avg and line now starts with a comma, then first column is indented - remove first comma
+                    if cols > avgColsRounded and line.startswith(","):
+                        print("Handling indentation in first column of this: " + line)
+                        finishedLines.append(line[1:len(line)])
+                    # if its col count < avg, there appears to be an empty cell and we can't easily tell where it is.
+                    elif cols > avgColsRounded and line.startswith(","):
+                        finishedLines.append(line + ",,<---- Data misaligned - empty table cell(s) in this row?")
+                    else:
+                        finishedLines.append(line)
+                else:
+                    finishedLines.append(line)
+        else:
+            finishedLines = convertedLines
+    else:
+        finishedLines = cleanLines
+
+    csv = "\n".join(finishedLines)
+    #print("CSV OUTPUT:\n" + csv)
+    if not foundTable:
+        csv = None
+        #print("No table data found in this match.")
     return csv
+
+def is_in_table(line, colCount):
+    # if no column breaks found or only 1 due to leading spaces, don't consider this line part of the table
+    return colCount > 1 and (not line.startswith(",") or colCount > 2)
 
 class About:
     def GET(self):
@@ -140,18 +212,51 @@ class Edit_profiles:
     def GET(self):
         return render.editProfiles()
 
+class FullText:
+    def POST(self):
+        x = web.input(myfile={})
+        filedir = '../static'
+        if 'myfile' in x:  # chck file obj created
+            filepath = x.myfile.filename.replace('\\', '/')
+            filename = filepath.split('/')[-1]
+            fout = open(filedir + '/temp.pdf', 'w')
+            fout.write(x.myfile.file.read())
+            fout.close()
+            subprocess.call([
+                'pdftotext', '-table', 'static/temp.pdf', 'static/output.txt'
+            ])
+
+            with open('../static/output.txt') as fi: txt=fi.read()
+
+            # web.header('Content-Type',' application/download')
+            # web.header('Content-Transfer-Encoding',' Binary')
+            # web.header('Content-disposition', 'attachment; filename=output.txt')
+            return
 
 class Upload:
     def GET(self):
         # authentication check
         # if web.ctx.env.get('HTTP_AUTHORIZATION') is not None:
           web.header('Content-Type', 'text/html; charset=usf-8')
-          return render.upload()
+          return render.upload(regs)
         # else:
         #     raise web.seeother('/login')
 
     def POST(self):
         x = web.input(myfile={})
+        profileNameInput = web.input(profileName={})
+        profileRegexInput = web.input(profileRegex={})
+        
+        profileName = ''
+        profileRegex = ''
+
+        if 'profileName' in profileNameInput:
+            profileName = profileNameInput.profileName
+
+        if 'profileRegex' in profileRegexInput:
+            profileRegex = profileRegexInput.profileRegex
+
+
         filedir = '../static'
         if 'pdfFile' in x:  # chck file obj created
             #filepath = x.myfile.filename.replace('\\', '/')
@@ -164,8 +269,8 @@ class Upload:
             ])
 
             with open('../static/output.txt') as fi: txt=fi.read()
-
-            returnval = processRegex(txt)
+ 
+            returnval = processRegex(txt, profileName, profileRegex)
             return returnval
 
 class Login:

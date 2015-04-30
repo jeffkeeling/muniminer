@@ -1,40 +1,49 @@
-$var showPDFLink: False
+$def with (regs)
 
-<form class="pdf-form" method="POST"  enctype="multipart/form-data" action="">
-	<div id="form-sections-container">
-        <div id="pdf-container">
-            <p class="instruction">1. Select a PDF to process</p>
-            <input type="file" name="pdfFile" accept="application/pdf"  />
-            <!-- <p class="or">Or</p>
-            <p>Drag and Drop your PDF here</p>
-            <p class="or">Or</p>
-            <div class="dropbox-container"></div> -->
-        </div>
-<!--
-        <div id="profile-container">
-            <p class="instruction">2. Select a profile <br /> to parse your PDF</p>
-            <select class="profile-dropdown">
-            	<option value="default">Select a Profile</option>
-                <option data-custom="false" value="profile1">Profile 1</option>
-                <option data-custom="false" value="profile2">Profile 2</option>
-                <option data-custom="false" value="profile3">Profile 3</option>
-                <option data-custom="false" value="profile4">Profile 4</option>
-            </select>
-            <p class="or">Or</p>
-            <p>Make your own</p>
-            <div class="profile-name-container">
-                <label for="customProfileName">New Profile Name</label>
-                <input type="text" name="customProfile" id="customProfileName"/>
-                
+
+<div id="form-container">
+    <form method="POST"  enctype="multipart/form-data" action="">
+    	<div id="form-sections-container">
+            <div id="pdf-container">
+                <div id="pdf-error" class='error'></div>
+                <p id="pdf-instruction" class="instruction">1. Select a PDF to process</p>
+                <input type="file" id="pdf-input" name="pdfFile" accept="application/pdf"  />
+                <p class="or">Or</p>
+                <p>Drag and Drop your PDF here</p>
+                <!-- <p class="or">Or</p>
+                <div class="dropbox-container"></div> -->
             </div>
-            <div class="regex-container">
-                <label for="customProfileRegex">New Regular Expression</label>
-                <p class="example">example: /Title\s[a-zA-Z]+{0,9}/</p> 
-                <textarea id="customProfileRegex" class="customProfileRegex" rows="5" cols="10"></textarea>
+<!-- 
+            <div id="profile-container">
+                <div id="profile-error" class='error'></div>
+                <p id="profile-instruction" class="instruction">2. Select a profile <br /> to parse your PDF</p>
+                <select id="profile-dropdown">
+                	<option value="default">Select a Profile</option>
+                    $for key in regs:
+                        <option data-custom="false" value="$key">$key</option>
+
+                </select>
+                <p class="or">Or</p>
+                <p>Make your own</p>
+                <div id="profile-name-container">
+                    <label for="custom-profile-name">New Profile Name</label>
+                    <input type="text" name="customProfile" id="custom-profile-name"/>
+                    
+                </div>
+                <div id="regex-container">
+                    <label for="#custom-profile-regex">New Regular Expression</label>
+                    <p class="example">example: ^[a-zA-Z]+{0,9}\$</p> 
+                    <textarea id="custom-profile-regex" rows="5" cols="10"></textarea>
+                </div>
             </div>
-        </div>
 -->
-	</div>
-    
-    <input type="submit" value="Mine it!"  class="disabledButton" />
-</form>
+    	</div>
+        
+        <input id="submit-form" type="submit" value="Mine It!"  class="disabled-button submit-button" />
+        <div id="submit-full-text-container"><div id="submit-full-text" disabled class="disabled-button">Get Full PDF in Plain Text</div></div>
+
+        <div id="base-container">
+            <option data-custom='true'></option>
+        </div>
+    </form>
+</div>
