@@ -126,12 +126,13 @@ def processRegex(txt, profileName, profileRegex):
     for s in listForCsv:
         print(s)
         if s:
-            csv = csv + "\n" + make_csv(s)
+            table_csv = make_csv(s)
+            if table_csv:
+                csv = csv + "\n" + table_csv
     
-    responseJson['CSV Format'] = csv
-    
-    # Strangely, JSON conversion can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
-   
+    if csv:
+        responseJson['CSV Format'] = csv
+       
     web.header('Content-Type', 'application/json')
     return json.dumps(responseJson)
 
@@ -142,6 +143,7 @@ def make_csv(txt):
     # remove existing commas
     noCommas = singleSpaced.replace(',', '')
     cleanLines = noCommas.splitlines()
+    foundTable = False
     finishedLines = []
     if len(cleanLines) > 1:
         total = 0.0
@@ -168,6 +170,7 @@ def make_csv(txt):
                     numSkippedLines += 1
 
         if numSkippedLines < len(convertedLines):
+            foundTable = True
             avgCols = total / (len(convertedLines) - numSkippedLines)
             avgColsRounded = int(round(avgCols))
             print("Table columns = " + str(avgCols) + ", rounded to " + str(avgColsRounded))
@@ -192,6 +195,9 @@ def make_csv(txt):
 
     csv = "\n".join(finishedLines)
     #print("CSV OUTPUT:\n" + csv)
+    if not foundTable:
+        csv = None
+        #print("No table data found in this match.")
     return csv
 
 def is_in_table(line, colCount):
