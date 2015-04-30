@@ -81,17 +81,18 @@ allowed = {
     'user':'pass'
 }
 
+# Notes for user if this data is exposed:
+# This is a list of Python regular expression patterns to be applied to document text. 
+# Each must have at least one pair of parentheses. Everything matching within the outermost pair will be returned as the match.
+# Note that a double backslash sequence \\ is interpreted as a single backslash. So a line break is \\n.
+#    Pattern for a dollar ammount:  \\$[0-9,]+\\.?[0-9]?[0-9]?"
 regs = {
-    'Table IV-1': "^\\s*(Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
+    'Table IV-1': "^(\\s*Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
     'Bonds Outstanding': "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
 }
 
 def processRegex(txt, profileName, profileRegex):
     responseJson = {}
-    # This is a list of Python regular expression patterns to be applied to document text. 
-    # Note that a double backslash sequence \\ is interpreted as a single backslash. 
-    #    Pattern for a dollar ammount:  \\$[0-9,]+\\.?[0-9]?[0-9]?"
-    
     p = Parse(txt)
     listForCsv = []
     regexName = ''
@@ -124,35 +125,78 @@ def processRegex(txt, profileName, profileRegex):
     for s in listForCsv:
         print(s)
         if s:
-            csv = csv + make_csv(s)
+            csv = csv + "\n" + make_csv(s)
     
     responseJson['csv'] = csv
     
-    # Strangely, append() can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
+    # Strangely, JSON conversion can break due to extended ascii characters (e.g. 0xad) in PDF text even though regex works ok.
     responseJson['full'] = txt.replace('\xad', '-')
    
     web.header('Content-Type', 'application/json')
     return json.dumps(responseJson)
 
-    #return '\n\n'.join(out)
-
 
 def make_csv(txt):
-    # First, remove existing commas
-    txt = txt.replace(',', '')
-    # Split into columns when there are 3 or more spaces. Not sure how robust this rule is.
-    column_break = r"[ ]{3}[ ]*"
-    csv = re.sub(column_break, ",", txt)
     # remove empty lines that pdftotext seems to always insert
-    csv = re.sub(r"\n\n", "\n", csv)
-    # This is not good enough because 1) many tables use indentation within a column (following cells get shifted right).
-    # and 2) empty cells are skipped (following cells get shifted left).
-    #   idea: split each comma-delimited row on commas to determine the number of columns in each row and compute the avg
-    #           Verify that split() counts a leading , (first string in output is empty)
-    #     For each row, 
-    #       if its col count > avg and original text of row starts with a space, then INDENTED - remove first comma
-    #       if its col count < avg, append an extra column with text "<---- Data misaligned - empty table cell(s) in this row?"
+    singleSpaced = re.sub(r"\n\n", "\n", txt)
+    # remove existing commas
+    noCommas = singleSpaced.replace(',', '')
+    cleanLines = noCommas.splitlines()
+    finishedLines = []
+    if len(cleanLines) > 1:
+        total = 0.0
+        numSkippedLines = 0
+        convertedLines = []
+        for line in cleanLines:
+            # if line stripped of whitespace is empty, skip csv conversion
+            if line.isspace():
+                convertedLines.append(line)
+                numSkippedLines += 1
+            else:
+                # Split into columns when there are 3 or more spaces. Not sure how robust this rule is.
+                column_break = r"[ ]{3}[ ]*"
+                convertedLine = re.sub(column_break, ",", line)
+                convertedLines.append(convertedLine)
+                # Count the number of columns in each row. This is used to detect rows with too many or too few columns
+                # which can indicate indentation in the first column (too many) or empty cells in this row (too few columns)
+                cols = len(convertedLine.split(','))
+                if is_in_table(convertedLine, cols):
+                    #print(str(cols) + " columns:     " + convertedLine)
+                    total += cols
+                else:
+                    # don't count this line in the table calculations
+                    numSkippedLines += 1
+
+        if numSkippedLines < len(convertedLines):
+            avgCols = total / (len(convertedLines) - numSkippedLines)
+            avgColsRounded = int(round(avgCols))
+            print("Table columns = " + str(avgCols) + ", rounded to " + str(avgColsRounded))
+            for line in convertedLines:
+                cols = len(line.split(','))
+                if is_in_table(line, cols):
+                    # if its col count > avg and line now starts with a comma, then first column is indented - remove first comma
+                    if cols > avgColsRounded and line.startswith(","):
+                        print("Handling indentation in first column of this: " + line)
+                        finishedLines.append(line[1:len(line)])
+                    # if its col count < avg, there appears to be an empty cell and we can't easily tell where it is.
+                    elif cols > avgColsRounded and line.startswith(","):
+                        finishedLines.append(line + ",,<---- Data misaligned - empty table cell(s) in this row?")
+                    else:
+                        finishedLines.append(line)
+                else:
+                    finishedLines.append(line)
+        else:
+            finishedLines = convertedLines
+    else:
+        finishedLines = cleanLines
+
+    csv = "\n".join(finishedLines)
+    #print("CSV OUTPUT:\n" + csv)
     return csv
+
+def is_in_table(line, colCount):
+    # if no column breaks found or only 1 due to leading spaces, don't consider this line part of the table
+    return colCount > 1 and (not line.startswith(",") or colCount > 2)
 
 class About:
     def GET(self):
