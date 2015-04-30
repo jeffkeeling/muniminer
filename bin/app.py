@@ -261,18 +261,18 @@ class Upload:
             profileRegex = profileRegexInput.profileRegex
 
 
-        filedir = '../static'
+        filedir = '../static/'
         if 'pdfFile' in x:  # chck file obj created
             #filepath = x.myfile.filename.replace('\\', '/')
             #filename = filepath.split('/')[-1]
-            fout = open(filedir + '/temp.pdf', 'w')
+            fout = open(filedir + 'temp.pdf', 'w')
             fout.write(x.pdfFile)    #.file.read())
             fout.close()
             subprocess.call([
-                'pdftotext', '-table', 'static/temp.pdf', 'static/output.txt'
+                'pdftotext', '-table', filedir+'temp.pdf', filedir+'output.txt'
             ])
 
-            with open('../static/output.txt') as fi: txt=fi.read()
+            with open(filedir+'output.txt') as fi: txt=fi.read()
  
             returnval = processRegex(txt, profileName, profileRegex)
             return returnval
