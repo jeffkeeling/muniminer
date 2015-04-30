@@ -168,6 +168,7 @@
             if( $profileDropdown.find(':selected').data('custom') ) {
                 var localStorageRegex = localStorage.getItem($profileDropdown.val() );
                 data.append('profileRegex', localStorageRegex);
+                data.append('profileName', $profileDropdown.val());
             } else {
                 data.append('profileName', $profileDropdown.val());
             }
@@ -184,7 +185,7 @@
                     return;
                 }
             }
-            data.append('profileName', regexVal);
+            data.append('profileName', nameVal);
             data.append('profileRegex', regexVal);
             localStorage.setItem(nameVal, regexVal);
         }

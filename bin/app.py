@@ -81,31 +81,43 @@ allowed = {
     'user':'pass'
 }
 
-def processRegex(txt):
+regs = {
+    'Table IV-1': "^\\s*(Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
+    'Bonds Outstanding': "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
+}
+
+def processRegex(txt, profileName, profileRegex):
     responseJson = {}
     # This is a list of Python regular expression patterns to be applied to document text. 
     # Note that a double backslash sequence \\ is interpreted as a single backslash. 
     #    Pattern for a dollar ammount:  \\$[0-9,]+\\.?[0-9]?[0-9]?"
-    regs = {
-        'Table IV-1': "^\\s*(Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
-        'Bonds Outstanding': "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
-    }
+    
     p = Parse(txt)
-    listForCsv = [] 
+    listForCsv = []
+    regexName = ''
+    regexToUse = '' 
     for r in regs:
-        listForCsv.append('\nResults for ' + r + ':\n')
-        print("searching for " + r + ":  " + regs[r])
-        matches = p.getRegex(regs[r])
-        if matches and len(matches) > 0:
-            allmatches = ''
-            for m in matches:
-                allmatches += m  + "\n"
-                listForCsv.append( m  + "\n")
-            
-            responseJson[r] = allmatches
-        else:
-            responseJson[r] = "Text Pattern Not Found"
-            listForCsv.append("Not Found")
+        if r == profileName:
+            regexName = r
+            regexToUse = regs[r]
+
+    if regexName == '':
+        regexName = profileName
+        regexToUse = r'%s' % profileRegex
+
+    listForCsv.append('\nResults for ' + regexName + ':\n')
+    print("searching for " + regexName + ":  " + regexToUse)
+    matches = p.getRegex(regexToUse)
+    if matches and len(matches) > 0:
+        allmatches = ''
+        for m in matches:
+            allmatches += m  + "\n"
+            listForCsv.append( m  + "\n")
+        
+        responseJson[regexName] = allmatches
+    else:
+        responseJson[regexName] = "Text Pattern Not Found"
+        listForCsv.append("Not Found")
 
     print('Creating CSV version of output...')
     csv = ''
@@ -156,12 +168,25 @@ class Upload:
         # authentication check
         # if web.ctx.env.get('HTTP_AUTHORIZATION') is not None:
           web.header('Content-Type', 'text/html; charset=usf-8')
-          return render.upload()
+          return render.upload(regs)
         # else:
         #     raise web.seeother('/login')
 
     def POST(self):
         x = web.input(myfile={})
+        profileNameInput = web.input(profileName={})
+        profileRegexInput = web.input(profileRegex={})
+        
+        profileName = ''
+        profileRegex = ''
+
+        if 'profileName' in profileNameInput:
+            profileName = profileNameInput.profileName
+
+        if 'profileRegex' in profileRegexInput:
+            profileRegex = profileRegexInput.profileRegex
+
+
         filedir = '../static'
         if 'myfile' in x:  # chck file obj created
             filepath = x.myfile.filename.replace('\\', '/')
@@ -175,7 +200,7 @@ class Upload:
 
             with open('../static/output.txt') as fi: txt=fi.read()
  
-            returnval = processRegex(txt)
+            returnval = processRegex(txt, profileName, profileRegex)
             return returnval
 
 class Login:

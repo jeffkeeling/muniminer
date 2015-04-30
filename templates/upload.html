@@ -1,3 +1,6 @@
+$def with (regs)
+
+
 <div id="form-container">
     <form method="POST"  enctype="multipart/form-data" action="">
     	<div id="form-sections-container">
@@ -15,10 +18,8 @@
                 <p id="profile-instruction" class="instruction">2. Select a profile <br /> to parse your PDF</p>
                 <select id="profile-dropdown">
                 	<option value="default">Select a Profile</option>
-                    <option data-custom="false" value="profile1">Profile 1</option>
-                    <option data-custom="false" value="profile2">Profile 2</option>
-                    <option data-custom="false" value="profile3">Profile 3</option>
-                    <option data-custom="false" value="profile4">Profile 4</option>
+                    $for key in regs:
+                        <option data-custom="false" value="$key">$key</option>
 
                 </select>
                 <p class="or">Or</p>
