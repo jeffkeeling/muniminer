@@ -193,12 +193,18 @@ input[type="text"], textarea, #profile-name {
     cursor: no-drop;
 }
 
+
 #submit-form {
 	margin-top: 30px;
 }
 
 #form-container pre{
     overflow: scroll;
+    border: 1px solid rgb(228, 228, 228);
+}
+.returned-profile-name {
+    font-weight: 800;
+    font-size: 16px;
 }
 
 #edit-profile-list {
@@ -256,6 +262,22 @@ input[type="text"], textarea, #profile-name {
     border: 1px solid gray;
     border-radius: 5px;
     padding: 4px;
+}
+#submit-full-text-container{
+    text-align: center;
+}
+#submit-full-text {;
+    cursor: pointer;
+    margin: 0 auto;
+    display: inline-block;
+    font-size: 12px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 4px;
+}
+#submit-full-text.disabled-button {
+    opacity: 0.5;
+    cursor: no-drop;
 }
 
 #edit-profiles-error {

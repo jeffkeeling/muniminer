@@ -68,6 +68,7 @@ os.chdir(abspath)
 urls = (
     '/', 'Upload',
     '/upload', 'Upload',
+    '/full-text', 'FullText',
     '/display', "Display",
     '/login', 'Login',
     '/about', 'About',
@@ -162,6 +163,26 @@ class Edit_profiles:
     def GET(self):
         return render.editProfiles()
 
+class FullText:
+    def POST(self):
+        x = web.input(myfile={})
+        filedir = '../static'
+        if 'myfile' in x:  # chck file obj created
+            filepath = x.myfile.filename.replace('\\', '/')
+            filename = filepath.split('/')[-1]
+            fout = open(filedir + '/temp.pdf', 'w')
+            fout.write(x.myfile.file.read())
+            fout.close()
+            subprocess.call([
+                'pdftotext', '-table', 'static/temp.pdf', 'static/output.txt'
+            ])
+
+            with open('../static/output.txt') as fi: txt=fi.read()
+
+            # web.header('Content-Type',' application/download')
+            # web.header('Content-Transfer-Encoding',' Binary')
+            # web.header('Content-disposition', 'attachment; filename=output.txt')
+            return
 
 class Upload:
     def GET(self):

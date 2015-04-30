@@ -11,6 +11,7 @@
         $("form").submit(submitForm);
         $("#save-profiles").on('click', saveProfiles);
         $('#add-new-profile').on('click', addNewProfile);
+        $('#submit-full-text').on('click', getFullText);
 
         if(window.location.pathname === '/') {
             //populate dropdown with custom profiles
@@ -99,9 +100,11 @@
     var pdfChanged = function(e) {
         if ( $(e.currentTarget).val() ){
             $('#pdf-instruction').addClass('valid');
+            $('#submit-full-text').attr("disabled", false).removeClass('disabled-button');
             formObj.pdf = true;
         } else {
             $('#pdf-instruction').removeClass('valid');
+            $('#submit-full-text').attr("disabled", true).addClass('disabled-button');
             formObj.pdf = false;
         }
         $(formObj).trigger('change');
@@ -201,7 +204,7 @@
             {
                 var container = ''
                 for (var i in data) {
-                    container += '<p>' + i + '</p><pre>' + data[i] + '</pre>'
+                    container += '<p class="returned-profile-name">' + i + '</p><pre>' + data[i] + '</pre>'
                 }
                 $('#form-container').html(container);
 
@@ -214,7 +217,29 @@
             }
         });
     };
-
+    var getFullText = function(e) {
+        e.preventDefault();
+        var data = new FormData();
+        data.append('myfile', $('#pdf-input')[0].files[0]);
+        $.ajax({
+            url: '/full-text',
+            type: 'POST',
+            data: data,
+            cache: false,
+            processData: false, // Don't process the files
+            contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+            success: function(data, textStatus, jqXHR)
+            {
+                window.open('/static/output.txt', '_blank');
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+                console.log(jqXHR)
+                console.log(errorThrown);
+                $('#pdf-error').html("There was an error: " + textStatus).show();
+            }
+        });
+    }
     /*
     Edit Profiles Page
     */
