@@ -107,6 +107,10 @@ def processRegex(txt, profileName, profileRegex):
         regexName = profileName
         regexToUse = r'%s' % profileRegex
 
+    # OVERRIDING INPUT BECAUSE profileName IS COMING THROUGH AS AN EMPTY dict RATHER THAN A STRING
+    regexName = 'Table IV-1' #'Bonds Outstanding'
+    regexToUse = regs[regexName]
+
     listForCsv.append('\nResults for ' + regexName + ':\n')
     print("searching for " + regexName + ":  " + regexToUse)
     matches = p.getRegex(regexToUse)
