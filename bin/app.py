@@ -146,7 +146,7 @@ def make_csv(txt):
     foundTable = False
     finishedLines = []
     if len(cleanLines) > 1:
-        total = 0.0
+        tableCells = 0.0
         numSkippedLines = 0
         convertedLines = []
         for line in cleanLines:
@@ -164,28 +164,46 @@ def make_csv(txt):
                 cols = len(convertedLine.split(','))
                 if is_in_table(convertedLine, cols):
                     #print(str(cols) + " columns:     " + convertedLine)
-                    total += cols
+                    tableCells += cols
                 else:
                     # don't count this line in the table calculations
                     numSkippedLines += 1
 
         if numSkippedLines < len(convertedLines):
             foundTable = True
-            avgCols = total / (len(convertedLines) - numSkippedLines)
-            avgColsRounded = int(round(avgCols))
-            print("Table columns = " + str(avgCols) + ", rounded to " + str(avgColsRounded))
             for line in convertedLines:
                 cols = len(line.split(','))
                 if is_in_table(line, cols):
+                    lineCopy = ''
+                    # check for cells that didn't get split (not enough space between them).
+                    for cell in line.split(','):
+                        if cell.count('$') > 1:
+                            # This cell contains multiple dollar signs - split it up!
+                            numNewCells = cell.count('$') - 1
+                            tableCells += numNewCells
+                            cols += numNewCells
+                            print("Splitting this cell: " + cell)
+                            for newCell in cell.split('$'):
+                                if newCell:
+                                    lineCopy += '$' + newCell + ','
+                        else:
+                            lineCopy += cell + ','
+                    # drop extra trailing comma from re-assembling the cells
+                    lineCopy = lineCopy[0:len(lineCopy)-1]
+
+                    avgCols = tableCells / (len(convertedLines) - numSkippedLines)
+                    avgColsRounded = int(round(avgCols))
+                    #print("Table columns = " + str(avgCols) + ", rounded to " + str(avgColsRounded))
+
                     # if its col count > avg and line now starts with a comma, then first column is indented - remove first comma
-                    if cols > avgColsRounded and line.startswith(","):
-                        print("Handling indentation in first column of this: " + line)
-                        finishedLines.append(line[1:len(line)])
+                    if cols > avgColsRounded and lineCopy.startswith(","):
+                        print("Handling indentation in first column of this: " + lineCopy)
+                        finishedLines.append(lineCopy[1:len(lineCopy)])
                     # if its col count < avg, there appears to be an empty cell and we can't easily tell where it is.
-                    elif cols > avgColsRounded and line.startswith(","):
-                        finishedLines.append(line + ",,<---- Data misaligned - empty table cell(s) in this row?")
+                    elif cols < avgColsRounded:
+                        finishedLines.append(lineCopy + ",,<---- Data misaligned - empty/merged cell(s) in this row?")
                     else:
-                        finishedLines.append(line)
+                        finishedLines.append(lineCopy)
                 else:
                     finishedLines.append(line)
         else:
