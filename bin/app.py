@@ -85,11 +85,26 @@ allowed = {
 # Notes for user if this data is exposed:
 # This is a list of Python regular expression patterns to be applied to document text. 
 # Each must have at least one pair of parentheses. Everything matching within the outermost pair will be returned as the match.
-# Note that a double backslash sequence \\ is interpreted as a single backslash. So a line break is \\n.
+# Note that a double backslash sequence \\ is interpreted as a single backslash. So a line break is \\n and a dollar sign is \\$.
 #    Pattern for a dollar ammount:  \\$[0-9,]+\\.?[0-9]?[0-9]?"
+# To allow line breaks everywhere, \\s+ is used instead of single spaces. And instead of .*? to skip arbitrary text, we use
+# the super ugly (.*?\n*?.*?). If we used re.DOTALL, .*? would match newlines, but in testing that it seemed to cause it to act 
+# like a greedy match and go to the end of the document.
 regs = {
-    'Table IV-1': "^(\\s*Table IV-1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\n\\s*\\n)+)",
-    'Bonds Outstanding': "(as of (\\w+ \\d\\d?, \\d\\d\\d\\d),? the total.*?bonds outstanding was \\$[0-9,]+\\.?[0-9]?[0-9]?)"
+                  # the [)]? at the end handles docs that use parentheses around zero: ($0)
+    'Table IV-1': "^(\\s*Table IV ?- ?1\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?[)]?\\s*)+)",
+
+    'Bonds Outstanding': "(as\\s+of\\s+(\\w+\\s+\\d\\d?,?\\s+\\d\\d\\d\\d),?(.*?\n*?.*?)"
+                        +"the\\s+(total(.*?\n*?.*?)bonds\\s+outstanding"
+                                +"|outstanding\\s+balance(.*?\n*?.*?)promissory\\s+note"
+                                +"|amount\\s+outstanding(.*?\n*?.*?)bonds"
+                                +"|(aggregate\\s+)?(amount\\s+of\\s+)?outstanding\\s+(.*?\n*?.*?)bonds)"
+                        +"\\s+(is|are|was|were)\\s+(equal\\s+to\\s+)?\\$[0-9,]+\\.?[0-9]?[0-9]?)",
+
+    # this one's not well tested yet - added as an alternative when can't find this info in paragraph text.
+    'Table of Bonds Outstanding': "^(\\s*Table VI ?- ?\\d\\s*"
+                                    +"bonds outstanding\\s*"
+                                    +"$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\s*)+)"
 }
 
 def processRegex(txt, profileName, profileRegex):
@@ -206,6 +221,9 @@ def make_csv(txt):
                     # if its col count < avg, there appears to be an empty cell and we can't easily tell where it is.
                     elif cols < avgColsRounded:
                         finishedLines.append(lineCopy + ",,<---- Data misaligned - empty/merged cell(s) in this row?")
+                        #TODO: to prevent skipping empty cells, tempting to add some logic during the conversion loop above:
+                        #   If the preceding row has a column at the same point but more columns to the left, add empty column(s).
+                        #   This would work great for the PDFs that have perfectly aligned column output, but that's rare. 
                     else:
                         finishedLines.append(lineCopy)
                 else:
