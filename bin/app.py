@@ -96,15 +96,21 @@ regs = {
 
     'Bonds Outstanding': "(as\\s+of\\s+(\\w+\\s+\\d\\d?,?\\s+\\d\\d\\d\\d),?(.*?\n*?.*?)"
                         +"the\\s+(total(.*?\n*?.*?)bonds\\s+outstanding"
-                                +"|outstanding\\s+balance(.*?\n*?.*?)promissory\\s+note"
                                 +"|amount\\s+outstanding(.*?\n*?.*?)bonds"
                                 +"|(aggregate\\s+)?(amount\\s+of\\s+)?outstanding\\s+(.*?\n*?.*?)bonds)"
                         +"\\s+(is|are|was|were)\\s+(equal\\s+to\\s+)?\\$[0-9,]+\\.?[0-9]?[0-9]?)",
 
-    # this one's not well tested yet - added as an alternative when can't find this info in paragraph text.
+    # this is the backup plan for docs that don't have bonds outstanding info in paragraph text.
     'Table of Bonds Outstanding': "^(\\s*Table VI ?- ?\\d\\s*"
-                                    +"bonds outstanding\\s*"
-                                    +"$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\s*)+)"
+                                    +"(bonds outstanding"
+                                    +"|outstanding.*?bonds)"
+                                    +"\\s*$([^\\$]*?\\n)+(.*?\\$[0-9,]+\\.?[0-9]?[0-9]?\\s*)+)"
+#Outstanding Series 2003B Bonds
+    # todo: add a "Mortgages/Loans" profile to match things like
+    #     As of March 31, 2009, the outstanding balance of the Promissory Note was $2,647,368.
+    #     As of March 31, 2009, the Company reports that the outstanding balance on the Land Disposition and Development Agreement promissory note is $2,647,368.
+    #     As of March 31, 2009, the Company reports that the outstanding balance on the Chesapeake Home Loan is $12,379,130.
+    #                            "outstanding\\s+balance(.*?\n*?.*?)promissory\\s+note"
 }
 
 def processRegex(txt, profileName, profileRegex):
@@ -125,6 +131,10 @@ def processRegex(txt, profileName, profileRegex):
     listForCsv.append('\nResults for ' + regexName + ':\n')
     print("searching for " + regexName + ":  " + regexToUse)
     matches = p.getRegex(regexToUse)
+    if not matches and regexName == 'Bonds Outstanding':
+        print("Didn't find a match in paragraph text, searching for a table instead...")
+        matches = p.getRegex(regs['Table of Bonds Outstanding'])
+
     if matches and len(matches) > 0:
         allmatches = ''
         for m in matches:
