@@ -311,10 +311,10 @@ class Upload:
             fout.write(x.myfile.file.read())
             fout.close()
             subprocess.call([
-                'pdftotext', '-table', filedir+'temp.pdf', filedir+'output.txt'
+                'pdftotext', '-table', 'static/temp.pdf', 'static/output.txt'
             ])
 
-            with open(filedir+'output.txt') as fi: txt=fi.read()
+            with open('../static/output.txt') as fi: txt=fi.read()
  
             returnval = processRegex(txt, profileName, profileRegex)
             return returnval
