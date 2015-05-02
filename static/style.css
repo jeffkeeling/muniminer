@@ -225,6 +225,10 @@ input[type="text"], textarea, #profile-name {
     margin-right: 10px;
 }
 
+#edit-profile-list textarea{
+    width: 100%;
+}
+
 
 #edit-profile-headers {
     width: 340;
