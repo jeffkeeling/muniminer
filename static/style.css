@@ -170,7 +170,7 @@ input[type="text"], textarea, #profile-name {
 }
 
 .valid:before {
-    content: url('/static/check.png');
+    content: url('/static/check@2x.png');
     margin-left: -25px;
     position: absolute;
 }
