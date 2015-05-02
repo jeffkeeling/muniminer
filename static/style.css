@@ -170,7 +170,7 @@ input[type="text"], textarea, #profile-name {
 }
 
 .valid:before {
-    content: url('/static/check@2x.png');
+    content: url('/static/check.png');
     margin-left: -25px;
     position: absolute;
 }
@@ -271,7 +271,7 @@ input[type="text"], textarea, #profile-name {
 #submit-full-text-container{
     text-align: center;
 }
-#submit-full-text {;
+#submit-full-text {
     cursor: pointer;
     margin: 0 auto;
     display: inline-block;
