@@ -311,7 +311,7 @@ class Upload:
             fout.write(x.myfile.file.read())
             fout.close()
             subprocess.call([
-                'pdftotext', '-table', filedir+'/temp.pdf', 'static/output.txt'
+                'pdftotext', '-table', filedir+'/temp.pdf',  filedir+'/output.txt'
             ])
 
             with open(filedir+'/output.txt') as fi: txt=fi.read()
